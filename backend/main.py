@@ -1,14 +1,20 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 
+from rating import get_match_rating
+from score_parser import extract_score
+
 from utils.pdf_parser import extract_text_from_pdf
 from utils.chunker import chunk_text
+
 from rag_pipeline import (
     create_or_load_vector_store,
     retrieve_relevant_chunks
 )
+
 from prompts import ANALYSIS_PROMPT
 from llm import query_llm
+
 
 app = FastAPI()
 
@@ -20,20 +26,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.post("/analyze")
 async def analyze_resume(
     resume: UploadFile = File(...),
     job_desc: str = Form(...)
 ):
     print("Analyze endpoint hit")
+
     resume_text = extract_text_from_pdf(resume.file)
 
     chunks = chunk_text(resume_text)
 
     vectordb = create_or_load_vector_store(
-    chunks,
-    resume_text
-)
+        chunks,
+        resume_text
+    )
 
     relevant_context = retrieve_relevant_chunks(vectordb, job_desc)
 
@@ -44,4 +52,12 @@ async def analyze_resume(
 
     result = query_llm(prompt)
 
-    return {"analysis": result}
+    ats_score = extract_score(result)
+
+    rating = get_match_rating(ats_score)
+
+    return {
+        "score": ats_score,
+        "rating": rating,
+        "analysis": result
+    }
