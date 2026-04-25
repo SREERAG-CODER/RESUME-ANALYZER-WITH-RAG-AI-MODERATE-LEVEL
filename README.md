@@ -2,6 +2,9 @@
 
 An intelligent full-stack Resume Analyzer that evaluates resumes against job descriptions using Retrieval-Augmented Generation (RAG), vector embeddings, and Large Language Models.
 
+<img width="1504" height="1426" alt="image" src="https://github.com/user-attachments/assets/221c6c9c-3fd4-4267-b40c-dbeaf2a06f27" />
+
+
 ## Features
 
 * Upload PDF resumes for analysis
